@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../css/bootstrap.min.css">
+    <link rel="stylesheet" href="../css/style.css">
+    <script src="https://kit.fontawesome.com/3f86b0abf8.js" crossorigin="anonymous"></script>
+    <title>{% block page_title %}{% endblock %}</title>
+</head>
+<body class="container-fluid color_base">
+    <div class="row">
+        {% include "sidebar.html" %}
+        {% block page_content %}{% endblock %}
+    </div>
+    <script src="../js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

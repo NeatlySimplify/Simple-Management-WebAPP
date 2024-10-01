@@ -1,0 +1,21 @@
+<div class="table-responsive overflow-y-auto">
+    <table class="table table-primary">
+        <thead>
+            <tr>
+                <th scope="col">Origem</th>
+                <th scope="col">Data</th>
+                <th scope="col">Nome</th>
+            </tr>
+        </thead>
+
+        <tbody class="table-hover table-group-divider">
+            {% for item in list_scheduler %}
+            <tr class="">
+                <td scope="row"><a href="{{ item.id }}">{{ item.origem }}</a></td>
+                <td><a href="{{ item.id }}">{{ item.date_end }}</a></td>
+                <td><a href="{{ item.id }}">{{ item.name }}</a></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
