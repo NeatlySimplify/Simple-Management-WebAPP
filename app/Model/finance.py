@@ -1,13 +1,12 @@
 from . import *
-from .utils import Conta_Bancaria
-from .scheduler import Scheduler
 
 
 class Finance(BaseModel):
+    user: str
     nome: str
     valor: float
-    efetivada: bool
+    efetivado: bool
+    tag_tipo: str
     categoria: str
+    details: str = ''
     subcategoria: str
-    conta: Conta_Bancaria
-    evento: List[Scheduler]

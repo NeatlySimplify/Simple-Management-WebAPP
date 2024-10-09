@@ -1,8 +1,18 @@
 from . import *
-from .utils import People
+from pydantic import EmailStr
+
+
+class People(BaseModel):
+    nome: str
+    sexo: str
+    estado_civil: str
+    email: EmailStr
+    details: str = ''
+    tag_tipo: str
 
 
 class PessoaFisica(People):
+    user: str
     cpf: str
     rg: str
     pis: str
@@ -14,9 +24,14 @@ class PessoaFisica(People):
 
 
 class PessoaJuridica(People):
+    user: str
     cnpj: str
     responsavel: str
     tipo_empresa: str
     atividade_principal: str
     inscricao_municipal: str
     inscricao_estadual: str
+
+
+class User(People):
+    password: str

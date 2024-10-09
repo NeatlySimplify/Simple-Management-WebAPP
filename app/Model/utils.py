@@ -1,6 +1,5 @@
 from . import *
 from pydantic import EmailStr
-from .scheduler import Scheduler
 
 
 class Conta_Bancaria(BaseModel):
@@ -29,28 +28,17 @@ class Telefone(BaseModel):
     details: str
 
 
-# Template para outras classes.
-class People(BaseModel):
-    nome: str
-    evento: List[Scheduler]
-    sexo: str
-    estado_civil: str
-    telefone: List[Telefone]
-    endereco: List[Endereco]
-    email: EmailStr
-    details: str = ''
-    tagPessoa: str
-
 # Enums
-class TipoPessoa(str, Enum):
+class PeopleTag(str, Enum):
     CLIENT: str = "Cliente"
     PART: str = "Part"
     ADVERSO: str = "Adverso"
     ADVOGADO: str = "Advogado"
     ADMIN: str = "Admin"
+    USER: str = "User"
 
 
-class FinanceEntryType(str, Enum):
+class FinanceEntryTag(str, Enum):
     ENTRY: str = "Entry"
     EXIT: str = "Exit"
     TRANSFER: str = "Transfer"

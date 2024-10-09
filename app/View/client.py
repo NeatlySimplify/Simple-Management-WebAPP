@@ -1,6 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException
-
-from ..helper import get_token_header
+from . import *
 
 
 router = APIRouter(
@@ -9,9 +7,9 @@ router = APIRouter(
     responses={404: {"description": "Not found"}},
 )
 
-@router.get("/")
-async def get_clients():
-    return 0
+@router.get("/", response_class=HTMLResponse)
+async def get_template_page(template_page: str, request: Request):
+    return template.TemplateResponse(f"{template_page}", {"request": request})
 
 
 @router.get("/pf")

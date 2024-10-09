@@ -1,12 +1,12 @@
 from . import *
-from .scheduler import Scheduler
 
 
 class Service(BaseModel):
-    status: str
+    user: str
+    status: bool
     valor: float
-    descricao: str
-    events: Optional[List[Scheduler]] = []
+    categoria: str
+    details: str = ''
 
 
 class Process(Service):
@@ -17,4 +17,3 @@ class Process(Service):
     forum: str
     comarca: str
     vara: str
-    details: str

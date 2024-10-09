@@ -3,8 +3,10 @@ from datetime import datetime
 
 
 class Scheduler(BaseModel):
+    user: str
     nome: str
-    efetivado: bool
+    status: bool
     inicio: datetime
     fim: datetime
-    details: str
+    details: str = ''
+    tag_tipo: str
