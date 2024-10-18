@@ -50,4 +50,13 @@ class ScheduleTag(str, Enum):
     SERVICE: str = "Service"
     CLIENT: str = "Client"
 
+
+class PagamentoTag(str, Enum):
+    UNIQUE: str = "Unique"
+    DIARY: str = "Diary"
+    WEAKLY: str = "Weakly"
+    MONTH: str = "Month"
+    YEARLY: str = "Yearly"
+    CUSTOM: str = "Custom"
+
 # End

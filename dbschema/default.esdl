@@ -12,8 +12,9 @@ module default {
         estado_civil: str;
         details: str;
         tag_tipo: str;
+        nascimento: datetime;
 
-        multi evento: Scheduler {
+        multi evento::= .<user_id[is Scheduler] {
             on source delete delete target if orphan;
             on target delete allow;
         };
@@ -28,7 +29,7 @@ module default {
     }
 
     abstract type Service {
-        user_id: User;
+        user_id: uuid;
         status: bool;
         valor: float32;
         categoria: str;
@@ -95,15 +96,17 @@ module default {
             default := datetime_of_statement();
         };
         id_objeto: uuid;
-        user_id: People;
+        user_id: uuid;
         action: str;
         details: json;
     }
 
     type Scheduler {
-        user_id: User;
+        user_id: People;
         nome: str;
-        status: bool;
+        status: bool {
+            default:= false;
+        };
         end_time: datetime;
         start_time: datetime;
         details: str;
@@ -129,7 +132,7 @@ module default {
     }
 
     type PessoaFisica extending People {
-        user_id: User;
+        user_id: uuid;
         cpf: str;
         rg: str;
         pis: str;
@@ -148,7 +151,7 @@ module default {
         ) do (
             insert Auditable {
                 user_id := __old__.user_id,
-                id_objeto := <uuid>__old__.id,
+                id_objeto := __old__.id,
                 action := "update",
                 details := to_json
                 (
@@ -165,7 +168,7 @@ module default {
         ) do (
             insert Auditable {
                 user_id := __new__.user_id,
-                id_objeto := <uuid>__new__.id,
+                id_objeto := __new__.id,
                 action := "insert",
                 details := <json>__new__{*}
             }
@@ -176,7 +179,7 @@ module default {
         ) do (
             insert Auditable {
                 user_id := __old__.user_id,
-                id_objeto := <uuid>__old__.id,
+                id_objeto := __old__.id,
                 action := "delete",
                 details := <json>__old__{*}
             }
@@ -184,7 +187,7 @@ module default {
     }
 
     type PessoaJuridica extending People {
-        user_id: User;
+        user_id: uuid;
         cnpj: str;
         responsavel: str;
         tipo_empresa: str;
@@ -201,7 +204,7 @@ module default {
         ) do (
             insert Auditable {
                 user_id := __old__.user_id,
-                id_objeto := <uuid>__old__.id,
+                id_objeto := __old__.id,
                 action := "update",
                 details := to_json
                 (
@@ -217,8 +220,8 @@ module default {
             __new__.tag_tipo = "Cliente"
         ) do (
             insert Auditable {
-                user_id := <User>__new__.user_id,
-                id_objeto := <uuid>__new__.id,
+                user_id := __new__.user_id,
+                id_objeto := __new__.id,
                 action := "insert",
                 details := <json>__new__ {*}
             }
@@ -228,8 +231,8 @@ module default {
             __old__.tag_tipo = "Cliente"
         ) do (
             insert Auditable {
-                user_id := <User>__old__.user_id,
-                id_objeto := <uuid>__old__.id,
+                user_id := __old__.user_id,
+                id_objeto := __old__.id,
                 action := "delete",
                 details := <json>__old__ {*}
             }
@@ -238,14 +241,16 @@ module default {
 
     type User extending People {
         required password: str;
+        salt: str;
+
         multi conta: Conta;
 
         trigger log_update after update for each when (
             <json>__old__ {*} != <json>__new__ {*}
         ) do (
             insert Auditable {
-                user_id := <User>__old__.id,
-                id_objeto := <uuid>__old__.id,
+                user_id := __old__.id,
+                id_objeto := __old__.id,
                 action := "update",
                 details := to_json
                 (
@@ -259,8 +264,8 @@ module default {
 
         trigger log_insert after insert for each do (
             insert Auditable {
-                user_id := <User>__new__.id,
-                id_objeto := <uuid>__new__.id,
+                user_id := __new__.id,
+                id_objeto := __new__.id,
                 action := "insert",
                 details := <json>__new__ {*}
             }
@@ -268,8 +273,8 @@ module default {
 
         trigger log_delete after delete for each do (
             insert Auditable {
-                user_id := <User>__old__.id,
-                id_objeto := <uuid>__old__.id,
+                user_id := __old__.id,
+                id_objeto := __old__.id,
                 action := "delete",
                 details := <json>__old__ {*}
             }
@@ -287,9 +292,11 @@ module default {
     }
 
     type Finance {
-        user_id: User;
+        user_id: uuid;
         nome: str;
         valor: float32;
+        parcelas: int16;
+        periodicidade: str;
         tag_tipo: str;
         efetivado: bool {
             default := false;
@@ -297,21 +304,20 @@ module default {
         categoria: str;
         subcategoria: str;
         details: str;
-        conta: Conta {
-            on source delete delete target if orphan;
+        conta: Conta;
+        multi pagamento: .<finance[is Pagamento];
+            
+            on source delete delete target;
             on target delete allow;
         };
-        multi evento: Scheduler {
-            on source delete delete target if orphan;
-            on target delete allow;
-        };
+
 
         trigger log_update after update for each when (
             <json>__old__ {*} != <json>__new__ {*}
         ) do (
             insert Auditable {
-                user_id := <User>__old__.id,
-                id_objeto := <uuid>__old__.id,
+                user_id := __old__.user_id,
+                id_objeto := __old__.id,
                 action := "update",
                 details := to_json
                 (
@@ -325,8 +331,8 @@ module default {
 
         trigger log_insert after insert for each do (
             insert Auditable {
-                user_id := <User>__new__.id,
-                id_objeto := <uuid>__new__.id,
+                user_id := __new__.user_id,
+                id_objeto := __new__.id,
                 action := "insert",
                 details := <json>__new__ {*}
             }
@@ -334,15 +340,30 @@ module default {
 
         trigger log_delete after delete for each do (
             insert Auditable {
-                user_id := <User>__old__.id,
-                id_objeto := <uuid>__old__.id,
+                user_id := __old__.user_id,
+                id_objeto := __old__.id,
                 action := "delete",
                 details := <json>__old__ {*}
             }
         );
+    }
+
+    type Pagamento {
+        user_id: uuid;
+        finance: Finance;
+        valor: float32;
+        data_pagamento: datetime;
+        status: bool{
+            default:= false;
+        };
+        parcela: int16;
+        evento: Scheduler {
+            on source delete delete target;
+        }
+
 
         trigger update_saldo_on_insert after insert for each when (
-            __new__.efetivado = true
+            __new__.status = true
         ) do (
             update Conta filter .id = __new__.conta.id set {
                 saldo := .saldo + __new__.valor,
@@ -351,7 +372,7 @@ module default {
 
         
         trigger update_saldo_on_delete after delete for each when (
-            __old__.efetivado = true
+            __old__.status = true
         ) do (
             update Conta filter .id = __old__.conta.id set {
                 saldo := .saldo - __old__.valor
@@ -392,7 +413,20 @@ module default {
             else new_efetivado if __new__.efetivado = true
             else not_efetivado
         )
+
     }
+
+    # Quando um pagamento é efetivado ele verifica se todas as instancias de pagamento foram
+    # efetivadas, se sim ele procura pela instancia de Finance para mudar seu status para efetivado
+    trigger update_status_finance after update, insert for each when (
+        __new__.status = true
+    ) do (
+        with finance_linked:= (select Finance filter .id = __new__.finance_id),
+            pagamento_false:= (select Pagamento filter .id = __new__.finance_id and .status = false)
+        update finance_linked {
+            status:= not exists pagamento_false;
+        }
+    )
 }
 
 

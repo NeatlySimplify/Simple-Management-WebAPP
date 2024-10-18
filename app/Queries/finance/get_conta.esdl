@@ -1,3 +1,0 @@
-select Conta {
-    *
-} filter

@@ -1,3 +1,3 @@
-delete Pessoa {
+select Finance {
     **
 } filter .id = <uuid>$id;
