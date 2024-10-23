@@ -14,10 +14,6 @@ module default {
         tag_tipo: str;
         nascimento: datetime;
 
-        multi evento::= .<user_id[is Scheduler] {
-            on source delete delete target if orphan;
-            on target delete allow;
-        };
         multi telefone: Telefone {
             on source delete delete target if orphan;
             on target delete allow;
@@ -28,26 +24,24 @@ module default {
         };
     }
 
-    abstract type Service {
-        user_id: uuid;
+    type Service {
+        id_serviço: str;
+        user: User;
         status: bool;
         valor: float32;
         categoria: str;
         details: str;
+        custom: json;
+        multi cliente_id: People;
 
         multi evento: Scheduler {
             on source delete delete target if orphan;
             on target delete allow;
         };
-        #multi finance: Finance {
-        #    on source delete delete target if orphan;
-        #    on target delete allow;
-        #};
-        multi pessoa: People {
+        finance: Finance {
             on source delete delete target if orphan;
             on target delete allow;
-        };
-
+        }
         trigger log_update after update for each when (
             <json>__old__{*} != <json>__new__{*}
         ) do (
@@ -83,6 +77,12 @@ module default {
         );
     }
 
+    type ServiceTemplate {
+        user: User;
+        name: str;
+        fields: json;
+    }
+
     type Telefone {
         tipo: str;
         ddd: str;
@@ -96,21 +96,23 @@ module default {
             default := datetime_of_statement();
         };
         id_objeto: uuid;
-        user_id: uuid;
+        user: User;
         action: str;
         details: json;
     }
 
     type Scheduler {
-        user_id: People;
+        user: User;
         nome: str;
         status: bool {
             default:= false;
         };
         end_time: datetime;
         start_time: datetime;
+        peridiocidade: str;
         details: str;
         tag_tipo: str;
+        auto_change_status: true;
     }
 
     type Conta {
@@ -132,7 +134,7 @@ module default {
     }
 
     type PessoaFisica extending People {
-        user_id: uuid;
+        user: User;
         cpf: str;
         rg: str;
         pis: str;
@@ -187,7 +189,7 @@ module default {
     }
 
     type PessoaJuridica extending People {
-        user_id: uuid;
+        user: User;
         cnpj: str;
         responsavel: str;
         tipo_empresa: str;
@@ -199,7 +201,7 @@ module default {
             (
                 <json>__old__{*} != <json>__new__{*}
             ) and (
-                 __old__.tag_tipo = "Cliente"
+                __old__.tag_tipo = "Cliente"
             )
         ) do (
             insert Auditable {
@@ -244,6 +246,12 @@ module default {
         salt: str;
 
         multi conta: Conta;
+        links_Service: .<user[is Service];
+        links_ClientesPF: .<user[is PessoaFisica];
+        links_ClientesPJ: .<user[is PessoaJuridica];
+        links_Transaction: .<user[is Transacao];
+        links_Pagamentos: .<user[is Pagamento];
+        link_Evento::= .<user[is Scheduler];
 
         trigger log_update after update for each when (
             <json>__old__ {*} != <json>__new__ {*}
@@ -281,18 +289,18 @@ module default {
         );
     }
 
-    type Processo extending Service {
-        fase: str;
-        classe: str;
-        tipo: str;
-        rito: str;
-        forum: str;
-        comarca: str;
-        vara: str;
-    }
+    # type Processo extending Service {
+    #     fase: str;
+    #     classe: str;
+    #     tipo: str;
+    #     rito: str;
+    #     forum: str;
+    #     comarca: str;
+    #     vara: str;
+    # }
 
-    type Finance {
-        user_id: uuid;
+    type Transacao {
+        user_id: .<user[is User];
         nome: str;
         valor: float32;
         parcelas: int16;
@@ -303,10 +311,8 @@ module default {
         };
         categoria: str;
         subcategoria: str;
-        details: str;
         conta: Conta;
-        multi pagamento: .<finance[is Pagamento];
-            
+        multi pagamento: Pagamento;
             on source delete delete target;
             on target delete allow;
         };
@@ -349,8 +355,8 @@ module default {
     }
 
     type Pagamento {
-        user_id: uuid;
-        finance: Finance;
+        user: User;
+        transacao: Transacao;
         valor: float32;
         data_pagamento: datetime;
         status: bool{
@@ -380,11 +386,11 @@ module default {
         );
 
         trigger update_saldo_on_update after update for each when (
-             (__old__.efetivado = true or __new__.efetivado = true) and (
+            (__old__.efetivado = true or __new__.efetivado = true) and (
                 __old__.valor != __new__.valor or
                 __old__.conta != __new__.conta or
                 __old__.efetivado != __new__.efetivado
-             )
+            )
         ) do (
             with update_account := (
                 update Conta filter .id in {
@@ -414,19 +420,21 @@ module default {
             else not_efetivado
         )
 
+        # Quando um pagamento é efetivado ele verifica se todas as instancias de pagamento foram
+        # efetivadas, se sim ele procura pela instancia de Finance para mudar seu status para efetivado
+        trigger update_status_finance after update, insert for each when (
+            __new__.status = true
+        ) do (
+            with finance_linked:= (select Finance filter .id = __new__.finance_id),
+                pagamento_false:= (select Pagamento filter .id = __new__.finance_id and .status = false)
+            update finance_linked {
+                status:= not exists pagamento_false;
+            }
+        )
+
     }
 
-    # Quando um pagamento é efetivado ele verifica se todas as instancias de pagamento foram
-    # efetivadas, se sim ele procura pela instancia de Finance para mudar seu status para efetivado
-    trigger update_status_finance after update, insert for each when (
-        __new__.status = true
-    ) do (
-        with finance_linked:= (select Finance filter .id = __new__.finance_id),
-            pagamento_false:= (select Pagamento filter .id = __new__.finance_id and .status = false)
-        update finance_linked {
-            status:= not exists pagamento_false;
-        }
-    )
+    
 }
 
 

@@ -48,7 +48,6 @@ class ScheduleTag(str, Enum):
     FINANCE: str = "Finance"
     USER: str = "User"
     SERVICE: str = "Service"
-    CLIENT: str = "Client"
 
 
 class PagamentoTag(str, Enum):
