@@ -1,1 +1,0 @@
-delete Finance filter .id = <uuid>$id;

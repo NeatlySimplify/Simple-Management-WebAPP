@@ -1,0 +1,4 @@
+*.edgeql
+*.env
+__pychache__/
+TODO/

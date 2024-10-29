@@ -1,3 +1,3 @@
 import edgedb
 
-client = edgedb.create_async_client()
+db_async_client = edgedb.create_async_client()

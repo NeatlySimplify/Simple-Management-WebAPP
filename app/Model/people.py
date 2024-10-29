@@ -3,10 +3,10 @@ from pydantic import EmailStr
 
 
 class People(BaseModel):
+    email: EmailStr
     nome: str
     sexo: str
     estado_civil: str
-    email: EmailStr
     details: str = ''
     tag_tipo: str
 
@@ -35,3 +35,4 @@ class PessoaJuridica(People):
 
 class User(People):
     password: str
+    salt: str

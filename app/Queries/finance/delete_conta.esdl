@@ -1,1 +1,0 @@
-delete Conta filter .id = $id;

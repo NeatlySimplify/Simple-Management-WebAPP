@@ -1,5 +1,7 @@
-from . import *
+from networkx import union_all
 from pydantic import EmailStr
+
+from . import *
 
 
 class Conta_Bancaria(BaseModel):
@@ -57,5 +59,14 @@ class PagamentoTag(str, Enum):
     MONTH: str = "Month"
     YEARLY: str = "Yearly"
     CUSTOM: str = "Custom"
+
+
+class RelationshipTag(str, Enum):
+    CASADO: str = "Casado(a)"
+    SOLTEIRO: str = "Solteiro(a)"
+    VIUVO: str = "Viúvo(a)"
+    UNIAO: str = "Em União Estável"
+    DIVORCIADO: str = "Divorciado(a)"
+
 
 # End

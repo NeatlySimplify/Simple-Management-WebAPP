@@ -3,7 +3,7 @@ module default {
     abstract type People {
         required timestamp: datetime {
             default := datetime_of_statement();
-        }
+        };
         required email: str {
             delegated constraint exclusive;
         };
@@ -14,7 +14,7 @@ module default {
         tag_tipo: str;
         nascimento: datetime;
 
-        multi telefone: Telefone {
+        multi telefone: Phone {
             on source delete delete target if orphan;
             on target delete allow;
         };
@@ -25,28 +25,29 @@ module default {
     }
 
     type Service {
-        id_serviço: str;
+        id_Service: str;
         user: User;
         status: bool;
         valor: float32;
         categoria: str;
         details: str;
         custom: json;
-        multi cliente_id: People;
 
+        multi cliente_id: People;
         multi evento: Scheduler {
             on source delete delete target if orphan;
             on target delete allow;
         };
-        finance: Finance {
+        finance: Transacao {
             on source delete delete target if orphan;
             on target delete allow;
-        }
+        };
+
         trigger log_update after update for each when (
             <json>__old__{*} != <json>__new__{*}
         ) do (
             insert Auditable {
-                user_id := __old__.user_id,
+                user := __old__.user,
                 id_objeto := __old__.id,
                 action := "update",
                 details := to_json(
@@ -60,7 +61,7 @@ module default {
 
         trigger log_insert after insert for each do (
             insert Auditable {
-                user_id := __new__.user_id,
+                user := __new__.user,
                 id_objeto := __new__.id,
                 action := "insert",
                 details := <json>__new__{*}
@@ -69,10 +70,10 @@ module default {
 
         trigger log_delete after delete for each do (
             insert Auditable {
-                user_id := __old__.user_id,
+                user := __old__.user,
                 id_objeto := __old__.id,
                 action := "delete",
-                details := <json>__old__{*}
+                details := <json>__old__{*},
             }
         );
     }
@@ -83,9 +84,8 @@ module default {
         fields: json;
     }
 
-    type Telefone {
-        tipo: str;
-        ddd: str;
+    type Phone {
+        tipo: json;
         numero: str;
         contato: str;
         details: str;
@@ -112,7 +112,9 @@ module default {
         peridiocidade: str;
         details: str;
         tag_tipo: str;
-        auto_change_status: true;
+        auto_change_status: bool {
+            default:= false;
+        };
     }
 
     type Conta {
@@ -145,23 +147,18 @@ module default {
         nome_mae: str;
 
         trigger log_update after update for each when (
-            (
-                <json>__old__ {*} != <json>__new__ {*}
-            ) and (
-                __old__.tag_tipo = "Cliente"
-            )
+            (<json>__old__ {*} != <json>__new__ {*}) and (__old__.tag_tipo = "Cliente")
         ) do (
             insert Auditable {
-                user_id := __old__.user_id,
+                user := __old__.user,
                 id_objeto := __old__.id,
                 action := "update",
-                details := to_json
-                (
+                details := to_json(
                     '{' ++
                     '"before": ' ++ <str><json>__old__{*} ++ ',' ++
                     '"after": ' ++ <str><json>__new__{*} ++
                     '}'
-                )
+                ),
             }
         );
 
@@ -169,7 +166,7 @@ module default {
             __new__.tag_tipo = "Cliente"
         ) do (
             insert Auditable {
-                user_id := __new__.user_id,
+                user := __new__.user,
                 id_objeto := __new__.id,
                 action := "insert",
                 details := <json>__new__{*}
@@ -180,7 +177,7 @@ module default {
             __old__.tag_tipo = "Cliente"
         ) do (
             insert Auditable {
-                user_id := __old__.user_id,
+                user := __old__.user,
                 id_objeto := __old__.id,
                 action := "delete",
                 details := <json>__old__{*}
@@ -205,7 +202,7 @@ module default {
             )
         ) do (
             insert Auditable {
-                user_id := __old__.user_id,
+                user := __old__.user,
                 id_objeto := __old__.id,
                 action := "update",
                 details := to_json
@@ -222,7 +219,7 @@ module default {
             __new__.tag_tipo = "Cliente"
         ) do (
             insert Auditable {
-                user_id := __new__.user_id,
+                user := __new__.user,
                 id_objeto := __new__.id,
                 action := "insert",
                 details := <json>__new__ {*}
@@ -233,7 +230,7 @@ module default {
             __old__.tag_tipo = "Cliente"
         ) do (
             insert Auditable {
-                user_id := __old__.user_id,
+                user := __old__.user,
                 id_objeto := __old__.id,
                 action := "delete",
                 details := <json>__old__ {*}
@@ -244,35 +241,39 @@ module default {
     type User extending People {
         required password: str;
         salt: str;
+        conta_ativa: bool{
+            default := true;
+        };
+        ultimo_login: datetime{
+            default := datetime_of_statement();
+        };
+        multi conta: Conta {
+            on target delete allow;
+            on source delete delete target;
+        };
 
-        multi conta: Conta;
-        links_Service: .<user[is Service];
-        links_ClientesPF: .<user[is PessoaFisica];
-        links_ClientesPJ: .<user[is PessoaJuridica];
-        links_Transaction: .<user[is Transacao];
-        links_Pagamentos: .<user[is Pagamento];
-        link_Evento::= .<user[is Scheduler];
+        # Usando backlinks para selecionar de modo dinâmico todas as entradas com o uuid do usuário
+        # quando o usuário é deletado, todas as entradas ligadas ao usuário são excluidas.
+        multi service := (.<user[is Service]);
+        multi clientesPF := (.<user[is PessoaFisica]);
+        multi clientesPJ := (.<user[is PessoaJuridica]);
+        multi transactions := (.<user[is Transacao]);
+        multi evento := (.<user[is Scheduler]);
 
         trigger log_update after update for each when (
             <json>__old__ {*} != <json>__new__ {*}
         ) do (
             insert Auditable {
-                user_id := __old__.id,
+                user := <User>__old__.id,
                 id_objeto := __old__.id,
                 action := "update",
-                details := to_json
-                (
-                    '{' ++
-                    '"before": ' ++ <str><json>__old__{*} ++ ',' ++
-                    '"after": ' ++ <str><json>__new__{*} ++
-                    '}'
-                )
+                details := to_json('{' ++ '"before": ' ++ <str><json>__old__{*} ++ ',' ++ '"after": ' ++ <str><json>__new__{*} ++'}')
             }
         );
 
         trigger log_insert after insert for each do (
             insert Auditable {
-                user_id := __new__.id,
+                user := <User>__new__.id,
                 id_objeto := __new__.id,
                 action := "insert",
                 details := <json>__new__ {*}
@@ -281,7 +282,7 @@ module default {
 
         trigger log_delete after delete for each do (
             insert Auditable {
-                user_id := __old__.id,
+                user := <User>__old__.id,
                 id_objeto := __old__.id,
                 action := "delete",
                 details := <json>__old__ {*}
@@ -289,18 +290,8 @@ module default {
         );
     }
 
-    # type Processo extending Service {
-    #     fase: str;
-    #     classe: str;
-    #     tipo: str;
-    #     rito: str;
-    #     forum: str;
-    #     comarca: str;
-    #     vara: str;
-    # }
-
     type Transacao {
-        user_id: .<user[is User];
+        user: User;
         nome: str;
         valor: float32;
         parcelas: int16;
@@ -312,21 +303,19 @@ module default {
         categoria: str;
         subcategoria: str;
         conta: Conta;
-        multi pagamento: Pagamento;
+        multi pagamento: Pagamento{
             on source delete delete target;
             on target delete allow;
         };
-
 
         trigger log_update after update for each when (
             <json>__old__ {*} != <json>__new__ {*}
         ) do (
             insert Auditable {
-                user_id := __old__.user_id,
+                user := __old__.user,
                 id_objeto := __old__.id,
                 action := "update",
-                details := to_json
-                (
+                details := to_json(
                     '{' ++
                     '"before": ' ++ <str><json>__old__{*} ++ ',' ++
                     '"after": ' ++ <str><json>__new__{*} ++
@@ -337,7 +326,7 @@ module default {
 
         trigger log_insert after insert for each do (
             insert Auditable {
-                user_id := __new__.user_id,
+                user := __new__.user,
                 id_objeto := __new__.id,
                 action := "insert",
                 details := <json>__new__ {*}
@@ -346,7 +335,7 @@ module default {
 
         trigger log_delete after delete for each do (
             insert Auditable {
-                user_id := __old__.user_id,
+                user := __old__.user,
                 id_objeto := __old__.id,
                 action := "delete",
                 details := <json>__old__ {*}
@@ -367,74 +356,52 @@ module default {
             on source delete delete target;
         }
 
-
         trigger update_saldo_on_insert after insert for each when (
             __new__.status = true
         ) do (
-            update Conta filter .id = __new__.conta.id set {
-                saldo := .saldo + __new__.valor,
+            update Conta filter .id = __new__.transacao.conta.id set {
+                saldo := .saldo + __new__.valor
             }
         );
 
-        
+
         trigger update_saldo_on_delete after delete for each when (
             __old__.status = true
         ) do (
-            update Conta filter .id = __old__.conta.id set {
+            update Conta filter .id = __old__.transacao.conta.id set {
                 saldo := .saldo - __old__.valor
             }
         );
 
         trigger update_saldo_on_update after update for each when (
-            (__old__.efetivado = true or __new__.efetivado = true) and (
+            (__old__.status = true or __new__.status = true) and (
                 __old__.valor != __new__.valor or
-                __old__.conta != __new__.conta or
-                __old__.efetivado != __new__.efetivado
+                __old__.transacao.conta != __new__.transacao.conta or
+                __old__.status != __new__.status
             )
         ) do (
-            with update_account := (
-                update Conta filter .id in {
+            with
+                update_account := (update Conta filter .id in {
+                    __old__.transacao.conta.id, __new__.transacao.conta.id} set {
+                    saldo := (.saldo - __old__.valor) if .id = __old__.transacao.conta.id
+                    else (.saldo + __new__.valor) if .id = __new__.transacao.conta.id
+                    else .saldo}),
 
-                    __old__.conta.id, __new__.conta.id
+                new_efetivado := (update Conta filter .id = __old__.transacao.conta.id set {
+                    saldo := .saldo + __old__.valor}),
 
-                } set {
-                    saldo := (.saldo - __old__.valor) if .id = __old__.conta.id 
-                    else (.saldo + __new__.valor) if .id = __new__.conta.id 
-                    else .saldo
-                }
+                not_efetivado := (update Conta filter .id = __old__.transacao.conta.id set {
+                        saldo := .saldo - __old__.valor})
 
-            ),
-            new_efetivado := (
-                update Conta filter .id = __old__.conta.id set {
-                    saldo := .saldo + __old__.valor
-                }
-            ),
-            not_efetivado := (
-                update Conta filter .id = __old__.conta.id set {
-                    saldo := .saldo - __old__.valor
-                }
-            )
-            
-            select update_account if (__old__.valor != __new__.valor or __old__.conta != __new__.conta) 
-            else new_efetivado if __new__.efetivado = true
+            select update_account if (__old__.valor != __new__.valor or __old__.transacao.conta != __new__.transacao.conta)
+            else new_efetivado if __new__.status = true
             else not_efetivado
-        )
-
-        # Quando um pagamento é efetivado ele verifica se todas as instancias de pagamento foram
-        # efetivadas, se sim ele procura pela instancia de Finance para mudar seu status para efetivado
-        trigger update_status_finance after update, insert for each when (
-            __new__.status = true
-        ) do (
-            with finance_linked:= (select Finance filter .id = __new__.finance_id),
-                pagamento_false:= (select Pagamento filter .id = __new__.finance_id and .status = false)
-            update finance_linked {
-                status:= not exists pagamento_false;
-            }
-        )
+        );
+        trigger update_status_finance after update, insert for each when (__new__.status = true) do (
+            with finance_linked:= (select Transacao filter .id = __new__.transacao.id),
+            pagamento_false:= (select Pagamento filter .transacao = __new__.transacao and .status = false),
+            update Transacao filter .id = finance_linked.id set {efetivado:= (select not exists pagamento_false)}
+        );
 
     }
-
-    
 }
-
-
