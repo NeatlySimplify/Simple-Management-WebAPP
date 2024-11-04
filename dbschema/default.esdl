@@ -13,15 +13,19 @@ module default {
         details: str;
         tag_tipo: str;
         nascimento: datetime;
+        cidade_atual: str;
+        estado_atual: str;
 
-        multi telefone: Phone {
-            on source delete delete target if orphan;
-            on target delete allow;
-        };
-        multi endereco: Endereco {
-            on source delete delete target if orphan;
-            on target delete allow;
-        };
+        # multi telefone: Phone {
+        #     on source delete delete target if orphan;
+        #     on target delete allow;
+        # };
+        # multi endereco: Endereco {
+        #     on source delete delete target if orphan;
+        #     on target delete allow;
+        # };
+        telefone: json;
+        endereco: json;
     }
 
     type Service {
@@ -84,12 +88,12 @@ module default {
         fields: json;
     }
 
-    type Phone {
-        tipo: json;
-        numero: str;
-        contato: str;
-        details: str;
-    }
+    # type Phone {
+    #     tipo: json;
+    #     numero: str;
+    #     contato: str;
+    #     details: str;
+    # }
 
     type Auditable {
         required timestamp: datetime {
@@ -125,15 +129,15 @@ module default {
         tipo_conta: str;
     }
 
-    type Endereco {
-        rua: str;
-        numero: str;
-        complemento: str;
-        bairro: str;
-        cep: str;
-        cidade: str;
-        estado: str;
-    }
+    # type Endereco {
+    #     rua: str;
+    #     numero: str;
+    #     complemento: str;
+    #     bairro: str;
+    #     cep: str;
+    #     cidade: str;
+    #     estado: str;
+    # }
 
     type PessoaFisica extending People {
         user: User;
@@ -240,7 +244,6 @@ module default {
 
     type User extending People {
         required password: str;
-        salt: str;
         conta_ativa: bool{
             default := true;
         };

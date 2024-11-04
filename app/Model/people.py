@@ -1,5 +1,8 @@
+from datetime import date
+import json
 from . import *
 from pydantic import EmailStr
+from app.Model.utils import Telefone, Endereco
 
 
 class People(BaseModel):
@@ -9,6 +12,11 @@ class People(BaseModel):
     estado_civil: str
     details: str = ''
     tag_tipo: str
+    nascimento: date
+    cidade_atual: str
+    estado_atual: str
+    telefone: List[Telefone]
+    endereco: List[Telefone]
 
 
 class PessoaFisica(People):
@@ -35,4 +43,8 @@ class PessoaJuridica(People):
 
 class User(People):
     password: str
-    salt: str
+
+
+class Login(BaseModel):
+    email: EmailStr
+    password: str

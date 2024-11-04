@@ -40,6 +40,10 @@ async def update_user(
     nascimento: datetime.datetime,
     password: str,
     conta_ativa: bool,
+    cidade_atual: str,
+    estado_atual: str,
+    telefone: str,
+    endereco: str,
     user: uuid.UUID,
 ) -> UpdateUserResult | None:
     return await executor.query_single(
@@ -52,6 +56,10 @@ async def update_user(
             nascimento:= <datetime>$nascimento ?? .nascimento,
             password:= <str>$password ?? .password,
             conta_ativa:= <bool>$conta_ativa ?? .conta_ativa,
+            cidade_atual:= <str>$cidade_atual ?? .cidade_atual,
+            estado_atual:= <str>$estado_atual ?? .estado_atual,
+            telefone:= <json>$telefone ?? .telefone,
+            endereco:= <json>$endereco ?? .endereco,
         };\
         """,
         nome=nome,
@@ -61,5 +69,9 @@ async def update_user(
         nascimento=nascimento,
         password=password,
         conta_ativa=conta_ativa,
+        cidade_atual=cidade_atual,
+        estado_atual=estado_atual,
+        telefone=telefone,
+        endereco=endereco,
         user=user,
     )

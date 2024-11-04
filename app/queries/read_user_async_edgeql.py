@@ -28,17 +28,15 @@ class NoPydanticValidation:
 @dataclasses.dataclass
 class ReadUserResult(NoPydanticValidation):
     id: uuid.UUID
-    email: str
     nome: str | None
     sexo: str | None
     estado_civil: str | None
     details: str | None
     nascimento: datetime.datetime | None
-    salt: str | None
     password: str
     conta: list[ReadUserResultContaItem]
-    telefone: list[ReadUserResultTelefoneItem]
-    endereco: list[ReadUserResultEnderecoItem]
+    telefone: str | None
+    endereco: str | None
 
 
 @dataclasses.dataclass
@@ -51,27 +49,6 @@ class ReadUserResultContaItem(NoPydanticValidation):
     tipo_conta: str | None
 
 
-@dataclasses.dataclass
-class ReadUserResultEnderecoItem(NoPydanticValidation):
-    id: uuid.UUID
-    bairro: str | None
-    cep: str | None
-    cidade: str | None
-    complemento: str | None
-    estado: str | None
-    numero: str | None
-    rua: str | None
-
-
-@dataclasses.dataclass
-class ReadUserResultTelefoneItem(NoPydanticValidation):
-    id: uuid.UUID
-    contato: str | None
-    details: str | None
-    numero: str | None
-    tipo: str | None
-
-
 async def read_user(
     executor: edgedb.AsyncIOExecutor,
     *,
@@ -81,17 +58,15 @@ async def read_user(
         """\
         select User {
             id,
-            email,
             nome,
             sexo,
             estado_civil,
             details,
             nascimento,
-            salt,
             password,
             conta: {*},
-            telefone: {*},
-            endereco: {*}
+            telefone,
+            endereco,
         } filter .id = <uuid>$user;\
         """,
         user=user,

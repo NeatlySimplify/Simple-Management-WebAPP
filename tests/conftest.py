@@ -1,10 +1,7 @@
-import hashlib
-import os
 from datetime import date
 from random import choice, random, randrange
 
 from faker import Faker
-from pydantic import constr
 import pytest
 
 from app.Model import finance, people, scheduler, service, utils
@@ -12,18 +9,19 @@ from app.Routes import user
 
 from app.Service import db_async_client
 
-fake = Faker("pt_BR")  # noqa: F405
+
+fake = Faker("pt_BR")
 
 
 @pytest.fixture(scope="session")
 def common_user_uuid():
     user = {
-        "email": "ribeirodennis9@gmail.com",
-        "senha": "24657122542"
+        "email": fake.free_email(),
+        "senha": fake.password(10, False, True, True)
     }
-    db = db_async_client()
-    
-    yield user
+    return user
+
+COMMON_USER = common_user_uuid
 
 #Data Instances
 

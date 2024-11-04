@@ -27,7 +27,6 @@ class NoPydanticValidation:
 @dataclasses.dataclass
 class LoginUserResult(NoPydanticValidation):
     id: uuid.UUID
-    salt: str | None
     password: str
 
 
@@ -43,7 +42,6 @@ async def login_user(
             ultimo_login := <datetime>datetime_of_statement()
         }) {
             id,
-            salt,
             password,
         };\
         """,

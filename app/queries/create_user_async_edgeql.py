@@ -40,8 +40,11 @@ async def create_user(
     details: str,
     tag_tipo: str,
     nascimento: datetime.datetime,
+    cidade_atual: str,
+    estado_atual: str,
     password: str,
-    salt: str,
+    telefone: str,
+    endereco: str,
 ) -> CreateUserResult:
     return await executor.query_single(
         """\
@@ -53,8 +56,11 @@ async def create_user(
             details:= <str>$details,
             tag_tipo:= <str>$tag_tipo,
             nascimento:= <datetime>$nascimento,
+            cidade_atual:= <str>$cidade_atual,
+            estado_atual:= <str>$estado_atual,
             password:= <str>$password,
-            salt:= <str>$salt
+            telefone:= <json>$telefone,
+            endereco:= <json>$endereco
         };\
         """,
         email=email,
@@ -64,6 +70,9 @@ async def create_user(
         details=details,
         tag_tipo=tag_tipo,
         nascimento=nascimento,
+        cidade_atual=cidade_atual,
+        estado_atual=estado_atual,
         password=password,
-        salt=salt,
+        telefone=telefone,
+        endereco=endereco,
     )

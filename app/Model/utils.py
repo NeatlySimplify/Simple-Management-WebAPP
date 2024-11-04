@@ -1,3 +1,4 @@
+from ast import Dict
 from networkx import union_all
 from pydantic import EmailStr
 
@@ -15,7 +16,7 @@ class Conta_Bancaria(BaseModel):
 class Endereco(BaseModel):
     rua: str
     numero: str
-    complemento: None | str
+    complemento: str = ''
     bairro: str
     cep: str
     cidade: str
@@ -23,8 +24,7 @@ class Endereco(BaseModel):
 
 
 class Telefone(BaseModel):
-    tipo: str
-    ddd: str
+    tipo: Dict
     numero: str
     contato: str
     details: str

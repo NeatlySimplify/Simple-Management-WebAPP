@@ -11,11 +11,6 @@ from app.Routes import user
 
 
 
-
-
-
-
-
 class Phone:
     type: list = [
         choice("Residencial", "Trabalho", "Outro"),
