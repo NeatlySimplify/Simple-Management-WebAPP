@@ -1,66 +1,132 @@
-
+from unittest import result
+from fastapi import Request
+from fastapi.responses import JSONResponse
+from fastapi.security import HTTPAuthorizationCredentials
+from app.util import get_edgedb_client
+from edgedb import errors
 from http import HTTPStatus
-from http.client import NOT_FOUND
 
-from fastapi import HTTPException
-from httpx import HTTPError, HTTPStatusError
-from app.queries import (
-    create_user_async_edgeql as create_user,
-    create_userBankAccount_async_edgeql as create_bankAccount,
-    delete_userBankAccount_async_edgeql as delete_bankAccount,
-    login_user_async_edgeql as login_user,
-    read_user_async_edgeql as retrieve_user,
-    update_user_async_edgeql as update_user,
-    delete_user_async_edgeql as delete_user,
-    update_userBankAccount_async_edgeql as update_bankAccount
-)
-
-from . import *
-import bcrypt
-from app.Model.people import User, Login
-
-
-def hash_password(password: str) -> str:
-    return bcrypt.hashpw(password, bcrypt.gensalt())
-
-
-def compare_password(hashed, password) -> bool:
-    return bcrypt.checkpw(password, hashed)
-
-
-async def create_user(user: User):
-    hashed_password = hash_password(user.password)
-    await create_user_async_edgeql.create_user(
-        executor=db_async_client,
-        email=user.email,
-        nome=user.nome,
-        sexo=user.sexo,
-        estado_civil=user.estado_civil,
-        details=user.details,
-        tag_tipo=user.tag_tipo,
-        nascimento=user.nascimento,
-        password=hashed_password,
-    )
-
-async def login(login: Login, user: User):
+    
+async def logout(request, user_id):
+    from app.queries.logout_async_edgeql import logout
+    db_client = get_edgedb_client(request)
     try:
-        result = await login_user.login_user(
-        executor=db_async_client,
-        email=login.email
+        await logout(db_client, user_id)
+        return JSONResponse(
+            status_code=HTTPStatus.OK,
+            content={
+                "status": "success",
+                "message": "User was Updated Successfully"
+            }
         )
-        user = User.model_validate_json(result)
-        validate = compare_password(user.password, login.password)
-        if not result:
-            return Exception(NOT_FOUND)
-        elif not validate:
-            pass
-        else:
-            return user
-    except edgedb.errors.ClientConnectionError:
-        raise HTTPException(503)
-
-async def register():
-    user = await retrieve_user.read_user(
-        executor=db_async_client,
-
+    except (errors.InternalServerError, errors.AvailabilityError, errors.BackendError) as e:
+        # Return the JSONResponse directly instead of raising it
+        return JSONResponse(
+            status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
+            content={
+                "status": "error",
+                "message": "Database error occurred.",
+                "details": str(e)
+            }
         )
+    except errors.ExecutionError as e:
+        return JSONResponse(
+            status_code=HTTPStatus.BAD_REQUEST,
+            content={
+                "status": "error",
+                "message": "Invalid execution.",
+                "details": str(e)
+            }
+        )
+    except Exception as e:
+        # Catch any other unforeseen errors
+        return JSONResponse(
+            status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
+            content={
+                "status": "error",
+                "message": "An unexpected error occurred.",
+                "details": str(e)
+            }
+        )
+
+
+async def change_password(request: Request, new_password):
+    from app.queries.update_user_async_edgeql import update_user
+    from app.util import hash_password
+    db_client = get_edgedb_client(request)
+    hashed_pw = hash_password(new_password)
+    try:
+        await update_user(
+            executor=db_client,
+                password=hashed_pw
+        )
+        return JSONResponse(
+            status_code=HTTPStatus.OK,
+            content={
+                "status": "success",
+                "message": "User was Updated Successfully"
+            }
+        )
+    except (errors.InternalServerError, errors.AvailabilityError, errors.BackendError) as e:
+        # Return the JSONResponse directly instead of raising it
+        return JSONResponse(
+            status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
+            content={
+                "status": "error",
+                "message": "Database error occurred.",
+                "details": str(e)
+            }
+        )
+    except errors.ExecutionError as e:
+        return JSONResponse(
+            status_code=HTTPStatus.BAD_REQUEST,
+            content={
+                "status": "error",
+                "message": "Invalid execution.",
+                "details": str(e)
+            }
+        )
+    except Exception as e:
+        # Catch any other unforeseen errors
+        return JSONResponse(
+            status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
+            content={
+                "status": "error",
+                "message": "An unexpected error occurred.",
+                "details": str(e)
+            }
+        )
+
+
+async def update_user():
+    pass
+
+async def create_template():
+    pass
+
+async def update_template():
+    pass
+
+async def delete_template():
+    pass
+
+async def get_template():
+    pass
+
+async def get_all_templates():
+    pass
+
+async def create_bank_account():
+    pass
+
+async def update_bank_account():
+    pass
+
+async def get_bank_account():
+    pass
+
+async def get_all_bank_accounts():
+    pass
+
+async def get_balance():
+    pass

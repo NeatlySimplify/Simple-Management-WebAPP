@@ -1,67 +1,84 @@
-
-from pathlib import Path
-from http import HTTPStatus
-from fastapi.templating import Jinja2Templates
-from fastapi.responses import HTMLResponse
-from fastapi import FastAPI, Depends, HTTPException, Request
+from fastapi import Depends, FastAPI, Request, Depends
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-import asyncio
-#from .View import (client,
-                #    finance,
-                #    scheduler,
-                #    service,
-                #    user)
-
-now_path = str(Path.cwd())
-
-app = FastAPI()
-top = Path(__file__).resolve().parent
-app.mount("/Static", StaticFiles(directory=f"{now_path}/app/Static"), name="Static")
+from .util.variables import cors_config, templates
+from .util.database import lifetime
+from .util.auth import CookieInitializationMiddleware, get_current_user
+from .login import router as LoginRoute
+from .register import router as RegisterRoute
 
 
-templates = Jinja2Templates(directory=f"{top}/Static/templates")
+app = FastAPI(lifespan=lifetime)
 
+app.mount("/img", StaticFiles(directory=f"./app/static/img"), name="img")
+app.add_middleware(CORSMiddleware, **cors_config)
+app.add_middleware(CookieInitializationMiddleware)
+app.include_router(LoginRoute)
+app.include_router(RegisterRoute)
 
-#list_router = [client, finance, scheduler, service,user]
-#for item in list_router:
-#    app.include_router(item.router, prefix=f"/{item.__name__}")
-
-
-item = [
-    {
-        "id": "3325rwar23xaxsxaxs",
-        "date_end": "12/11/3411",
-        "origem": "Finance",
-        "name": "Contas"
-    },
-    {
-        "id": "3325rwar23xaxsxaxs",
-        "date_end": "12/11/3411",
-        "origem": "Finance",
-        "name": "Contas"
-    },
-    {
-        "id": "3325rwar23xaxsxaxs",
-        "date_end": "12/11/3411",
-        "origem": "Finance",
-        "name": "Contas"
-    },
-    {
-        "id": "3325rwar23xaxsxaxs",
-        "date_end": "12/11/3411",
-        "origem": "Finance",
-        "name": "Contas"
-    }
-]
 
 @app.get("/")
-async def get_dashboard(request: Request):
-    return templates.TemplateResponse( 
-        "dashboard.html", 
-        {
-            "request": request,
-            "cliente_num": 14,
-            "service_num": 7,
-            "list_scheduler": item
+async def getDashBoard(request: Request, session: str = Depends(get_current_user)):
+    cards = {
+        'row1': {
+            'Clientes Registrados': 17,
+            'Serviços Ativos': 8,
+            'Saldo Atual': 'R$ 1507,89'
+        },
+        'row2': {
+            'Entrada': {
+                'Entrada Consolidada': 'R$ 107,89',
+                'Entrada Prevista': 'R$ 1507,89' ,
+            },
+            'Saída': {
+                'Saída Consolidada': 'R$ 107,89',
+                'Saída Prevista': 'R$ 1507,89' ,
+            },
+            'Saldo do Mês': {
+                'Saldo Consolidado': 'R$ 107,89',
+                'Saldo Previsto': 'R$ 900,89' ,
             }
-        )
+        }
+    }
+    sidebar = {
+        'user': {
+            'title': 'Usuário',
+            'children': {
+                'perfil': 'Perfil',
+                'template': 'Templates',
+                'logout': 'Logout'
+            }
+            
+        },
+        'clients' : {
+            'title': 'Clientes',
+            'children': {
+                'pf':'Pessoa Física',
+                'pj': 'Pessoa Jurídica'
+                }
+            },
+        'services': {
+            'title': 'Serviços',
+            'children': {
+                'investigation': 'Investigação',
+                'process': 'Processos',
+                'consult': 'Consultoria'
+            }
+        },
+        'schedule': {
+            'title': 'Agenda',
+            'children': {
+                'from_user': 'From User',
+                'from_services': 'From Services',
+                'from_action': 'From Actions' 
+            }
+        }
+    }
+    return templates.TemplateResponse(
+        request=request,
+        name='dashboard.html',
+        context={
+            'sidebar': sidebar,
+            'card': cards
+        }
+    )

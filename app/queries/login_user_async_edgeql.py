@@ -27,7 +27,19 @@ class NoPydanticValidation:
 @dataclasses.dataclass
 class LoginUserResult(NoPydanticValidation):
     id: uuid.UUID
+    name: str
     password: str
+    account: list[LoginUserResultAccountItem]
+
+
+@dataclasses.dataclass
+class LoginUserResultAccountItem(NoPydanticValidation):
+    id: uuid.UUID
+    bankName: str | None
+    accountNumber: str | None
+    accountType: str | None
+    balance: float | None
+    agency: str | None
 
 
 async def login_user(
@@ -37,13 +49,17 @@ async def login_user(
 ) -> LoginUserResult | None:
     return await executor.query_single(
         """\
-        select (update User filter .email = <str>$email set {
-            conta_ativa := <bool>true,
-            ultimo_login := <datetime>datetime_of_statement()
-        }) {
+        select (
+            update User filter .email = <str>$email set {
+                isActive := <bool>true,
+                lastActiveDate := datetime_of_statement()
+            }
+        ) {
             id,
+            name,
             password,
-        };\
+            account: {*}
+        } limit 1;\
         """,
         email=email,
     )

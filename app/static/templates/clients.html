@@ -1,11 +1,14 @@
+{% extends "user_view.html" %}
+{% block page_content %}
+<p>Criar novo cliente</p>
 <div class="table-responsive overflow-y-auto">
     <table class="table table-primary">
         <thead>
             <tr>
-                <th scope="col">Efetivado</th>
-                <th scope="col">Origem</th>
-                <th scope="col">Data</th>
-                <th scope="col">Nome</th>
+                <th scope="col">Name</th>
+                <th scope="col">City</th>
+                <th scope="col">Category</th>
+                <th scope="col">Email</th>
             </tr>
         </thead>
 
@@ -36,7 +39,8 @@
                         alert('Failed to load data')
                     }
                 });
-                /* $.ajax({    
+                <!--
+                $.ajax({    
                     To edit
                     url: "https://your-fastapi-backend/api/resource", // Backend API endpoint
                     method: "GET",
@@ -50,8 +54,12 @@
                     error: function (xhr, status, error) {
                     console.error("Error:", error); // Handle errors
                     }
-                }); */
+                });
+                -->
             });
         });
     </script>
 </div>
+
+<p>Imprimir</p>
+{% endblock %}

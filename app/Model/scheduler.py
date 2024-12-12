@@ -1,5 +1,6 @@
-from . import *
+from pydantic import BaseModel
 from datetime import datetime
+from typing import Optional
 
 
 class Scheduler(BaseModel):
@@ -8,5 +9,5 @@ class Scheduler(BaseModel):
     status: bool
     inicio: datetime
     fim: datetime
-    details: str = ''
+    details: Optional[str]
     tag_tipo: str
