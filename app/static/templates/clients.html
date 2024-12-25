@@ -1,65 +1,24 @@
 {% extends "user_view.html" %}
+{% block page_title %}Clientes{% endblock %}
 {% block page_content %}
-<p>Criar novo cliente</p>
-<div class="table-responsive overflow-y-auto">
-    <table class="table table-primary">
-        <thead>
-            <tr>
-                <th scope="col">Name</th>
-                <th scope="col">City</th>
-                <th scope="col">Category</th>
-                <th scope="col">Email</th>
-            </tr>
-        </thead>
-
-        <tbody class="table-hover table-group-divider">
-            {% for item in list_scheduler %}
-            <tr class="clickable-row">
-                <td scope="row"><a href="{{ item.id }}">{{ item.origem }}</a></td>
-                <td><a href="{{ item.id }}">{{ item.date_end }}</a></td>
-                <td><a href="{{ item.id }}">{{ item.name }}</a></td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-    <script>
-        $(document).ready(function() {
-            $(".clickable-row").click(function () {
-                var userId = $(this).data('id');
-                var category = $(this).data('category')
-
-                $.ajax({
-                    url: `/${category}/${id}`,
-                    method: 'GET',
-                    success: function(response) {
-                        $('#modal-container').html(response);
-                        $('.modal').modal('show')
-                    },
-                    error: function() {
-                        alert('Failed to load data')
-                    }
-                });
-                <!--
-                $.ajax({    
-                    To edit
-                    url: "https://your-fastapi-backend/api/resource", // Backend API endpoint
-                    method: "GET",
-                    headers: {
-                    "X-Resource-ID": resourceId, // Custom header for resource ID
-                    "Authorization": `Bearer ${sessionToken}` // Token in Authorization header
-                    },
-                    success: function (response) {
-                    console.log("Data received:", response); // Handle success
-                    },
-                    error: function (xhr, status, error) {
-                    console.error("Error:", error); // Handle errors
-                    }
-                });
-                -->
-            });
-        });
-    </script>
+<div class="row"></div>
+{% for client in data %}
+    <div class="col-12">
+        <div class="card" id="{{client.id}}">
+            <div class="card-body">
+                <h3 class="card-title">{{client.name}}</h3>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item">Email : {{client.email}}</li>
+                    <li class="list-group-item">Tipo de Cliente : {{client.type_client}}</li>
+                    <li class="list-group-item">ID : {{client.govt_id}}</li>
+                    <li class="list-group-item">Estado : {{client.state}}</li>
+                    <li class="list-group-item">Cidade : {{client.city}}</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+{% else %}
+    <h2>Nenhum cliente encontrado</h2>
+{% endfor %}
 </div>
-
-<p>Imprimir</p>
 {% endblock %}

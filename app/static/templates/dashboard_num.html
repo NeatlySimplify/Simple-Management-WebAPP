@@ -1,15 +1,44 @@
 
 <div class="row g-3 border border-3 border-start-0 border-end-0">
-    {% for chave, item in card['row1'].items()  %}
     <div class="col-12 col-md-4 mb-3">
-        <div class="card text-bg-light h-100">
+        <div class="card text-bg-light h-10">
             <div class="card-body d-flex flex-column justify-content-evenly text-center">
-                <p class="card-text fs-2 text-wrap">{{ chave|e }}:</p>
-                <p class="card-text fs-2 fw-bold">{{ item|e }}</p>
+                <p class="card-text fs2">Clientes</p>
+                <p class="card-text fs2">{{card['Clientes']}}</p>
             </div>
         </div>
     </div>
-    {% endfor %}
+    <div class="col-12 col-md-4 mb-3">
+        <div class="card text-bg-light h-10">
+            <div class="card-body d-flex flex-column justify-content-evenly text-center">
+                <p class="card-text fs2">Clientes</p>
+                <p class="card-text fs2">{{card['Clientes']}}</p>
+            </div>
+        </div>
+    </div>
+    <a href="">
+        <div class="col-12 col-md-4 mb-3" id="saldo">
+            <div class="card text-bg-light h-10">
+                <div class="card-body d-flex flex-column justify-content-evenly text-center">
+                    <p class="card-text fs2">Saldo</p>
+                    <p class="card-text fs2">{{card['Saldo'].total}}</p>
+                    <ul id="lista_de_contas">
+
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </a>
+    
+    <script>
+        $(document).ready(function () {
+            $("#saldo").click(function (event) {
+                event.preventDefault();
+                
+            });
+        });
+    </script>
+    
 </div>
 <div class="row g-3 border border-3 border-start-0 border-end-0 border-top-0">
     {% for chave, item in card['row2'].items()  %}
