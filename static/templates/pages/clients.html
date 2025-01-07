@@ -1,0 +1,128 @@
+{% extends "user_view.html" %}
+{% block page_title %}Clientes{% endblock %}
+{% block page_content %}
+<div class="row"></div>
+
+{% for data in clients %}
+    <div 
+        class="col-12">
+        <div 
+            class="card">
+            <div 
+                class="card-body">
+                <h3 
+                    class="card-title">
+                    {{client.name}}
+                </h3>
+                <ul 
+                    class="
+                        list-group 
+                        list-group-flush">
+                    <li 
+                        class="list-group-item">
+                        Email : {{client.email}}
+                    </li>
+                    <li 
+                        class="list-group-item">
+                        Tipo de Cliente : {{client.type_client}}
+                    </li>
+                    <li 
+                        class="list-group-item">
+                        ID : {{client.govt_id}}
+                    </li>
+                    <li 
+                        class="list-group-item">
+                        Estado : {{client.state}}
+                    </li>
+                    <li 
+                        class="list-group-item">
+                        Cidade : {{client.city}}
+                    </li>
+                </ul>
+            </div>
+            <div class="card-footer">
+                <div 
+                    class="btn-group" 
+                    role="group" 
+                    data-client="{{data.id}}">
+                    <a
+                        data-bs-toggle="modal"
+                        data-bs-target="#staticBackdrop"
+                        class="
+                            btn 
+                            btn-outline-light
+                            app-client-edit"
+                        href="#"
+                        role="button">
+                        Editar
+                    </a>
+                    <a
+                        id="resource-open"
+                        data-bs-toggle="modal"
+                        data-bs-target="#staticBackdrop"
+                        class="
+                            btn 
+                            btn-outline-light
+                            app-client-get"
+                        href="#"
+                        role="button">
+                        Ver mais!
+                    </a>
+                    <a
+                        name="delete"
+                        class="
+                            btn 
+                            btn-outline-light
+                            app-client-delete"
+                        href="#"
+                        role="button">
+                        Excluir
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+{% else %}
+    <h2>Nenhum cliente encontrado</h2>
+{% endfor %}
+</div>
+<script type="module">
+    import { 
+        getPartial,
+        getForm,
+        updateForm,
+        postClient, 
+        updateClient,
+        deleteClient
+    } from "/js/client.js"
+
+    $(document).on('click', '.app-client-get', function (e) {
+        e.preventDefault();
+        let data = $(this).parent('data').data('client')
+        getPartial(data)
+    });
+    $(document).on('click', '.app-client-form', function (e) {
+        e.preventDefault();
+        getForm()
+    });
+    $(document).on('click', '.app-client-edit', function (e) {
+        e.preventDefault();
+        let data = $(this).parent('data').data('client')
+        updateForm(data)
+    });
+    $(document).on('click', '.app-client-create', function (e) {
+        e.preventDefault();
+        postClient()
+    });
+    $(document).on('click', '.app-client-update', function (e) {
+        e.preventDefault();
+        let data = $(this).parent('data').data('client')
+        updateClient(data)
+    });
+    $(document).on('click', '.app-client-delete', function (e) {
+        e.preventDefault();
+        let data = $(this).parent('data').data('client')
+        deleteClient(data)
+    });
+</script>
+{% endblock %}

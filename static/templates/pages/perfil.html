@@ -1,0 +1,247 @@
+{% extends "user_view.html" %}
+{% block page_title %}Perfil{% endblock %}
+{% block page_content %}
+<div 
+    class="row">
+    <div 
+        class="
+            col-12 
+            col-md-6">
+        <div 
+            class="card">
+            <div 
+                class="card-body">
+                <h3 
+                    class="card-title">
+                    Email
+                </h3>
+                <p 
+                    class="card-text">
+                    {{user.email}}
+                </p>
+            </div>
+        </div>
+    </div>
+    <div 
+        class="
+            col-12 
+            col-md-6">
+        <div 
+            class="card">
+            <div 
+                class="card-body">
+                <h3 
+                    class="card-title">
+                    Mudar Email
+                </h3>
+                <div 
+                    class="
+                        d-grid 
+                        gap-2">
+                    <button
+                        type="button"
+                        name=""
+                        id=""
+                        class="btn btn-primary"
+                    >
+                        Clique Aqui!
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div 
+    class="row">
+    <div 
+        class="col-12">
+        <div 
+            class="card">
+            <div 
+                class="card-body">
+                <h4 
+                    class="card-title">
+                    Mudar Senha
+                </h4>
+                <div 
+                    class="
+                        d-grid 
+                        gap-2">
+                    <button
+                        type="button"
+                        name=""
+                        id=""
+                        class="
+                            btn 
+                            btn-primary">
+                        Clique Aqui!
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div 
+    class="row card-group">
+    {% for bank in user.accounts%}
+    <div 
+        class="
+            col-12 
+            col-md-6
+            card">
+        <div 
+            class="card-body">
+            <h4 
+                class="card-title">
+                Nome do Banco:
+            </h4>
+            <p 
+                class="card-text">
+                {{bank.bankName}}
+            </p>
+            <h4 
+                class="card-title">
+                Agencia:
+            </h4>
+            <p 
+                class="card-text">
+                {{bank.agency}}
+            </p>
+            <h4 
+                class="card-title">
+                Número da conta:
+            </h4>
+            <p 
+                class="card-text">
+                {{bank.accountNumber}}
+            </p>
+            <h4 
+                class="card-title">
+                Saldo:
+            </h4>
+            <p 
+                class="card-text">
+                {{bank.balance}}
+            </p>
+            <h4 
+                class="card-title">
+                Tipo de Conta:
+            </h4>
+            <p 
+                class="card-text">
+                {{bank.accountType}}
+            </p>
+        </div>
+    </div>
+    {% else %}
+    <h3>Nenhuma conta bancária registrada</h3>
+    <p>Adicione uma para poder registrar transações!</p>
+</div>
+<div 
+    class="
+        row 
+        card-group">
+    <div 
+        class="
+            col-12 
+            col-md-6
+            card">
+        <div 
+            class="card-body">
+            <h4 
+                class="card-title">
+                Numero de Clientes Cadastrados:
+            </h4>
+            <p 
+                class="card-text">
+                {{clientNum}}
+            </p>
+        </div>
+    </div>
+    <div 
+        class="
+            col-12 
+            col-md-6 
+            card">
+        <div 
+            class="card-body">
+            <h4 
+                class="card-title">
+                Número de Serviços Cadastrados
+            </h4>
+            <p 
+                class="card-text">
+                {{serviceNum}}
+            </p>
+        </div>
+    </div>
+    <div 
+        class="
+            col-12 
+            col-md-6 
+            card">
+        <div 
+            class="card-body">
+            <h4 
+                class="card-title">
+                Transações Cadastradas:
+            </h4>
+            <p 
+                class="card-text">
+                {{transactionNum}}
+            </p>
+        </div>
+    </div>
+    <div 
+        class="
+            col-12 
+            col-md-6 
+            card">
+        <div 
+            class="card-body">
+            <h4 
+                class="card-title">
+                Eventos Cadastradas:
+            </h4>
+            <p 
+                class="card-text">
+                {{eventtNum}}
+            </p>
+        </div>
+    </div>
+    <div 
+        class="
+            col-12 
+            col-md-6 
+            card">
+        <div 
+            class="card-body">
+            <h4 
+                class="card-title">
+                Templates Cadastrados:
+            </h4>
+            <p 
+                class="card-text">
+                {{templatesNum}}
+            </p>
+        </div>
+    </div>
+    <div 
+        class="
+            col-12 
+            col-md-6 
+            card">
+        <div 
+            class="card-body">
+            <h4 
+                class="card-title">
+                Saldo Total:
+            </h4>
+            <p 
+                class="card-text">
+                {{balanceTotal}}
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    {% include 'partials/stylePartial.html'%}
+    <title>{% block page_title %}{% endblock %}</title>
+</head>
+<body class="container-fluid color_base">
+    <div>
+        {% block view %}{% endblock %}
+    </div>
+    {% include 'partials/scriptPartial.html'%}
+</body>
+</html>

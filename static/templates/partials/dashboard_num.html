@@ -1,0 +1,21 @@
+
+<div class="card-group row g-3 border border-3 border-start-0 border-end-0">
+    {% include "partials/dashboardCard.html" with title="Clientes", var=num %}
+</div>
+<div class="row g-3 border border-3 border-start-0 border-end-0 border-top-0">
+    {% for chave, item in card['row2'].items()  %}
+    <div class="col-12 col-lg-4 mb-3">
+        <div class="card text-bg-light h-100">
+            <div class="card-body">
+                <h5 class="card-title text-center">{{ chave|e }}</h5>
+                {% for k, n in item.items() %}
+                <p class="card-text d-flex flex-md-row flex-column justify-content-md-between"><span class="text-wrap ms-2">{{k|e}}: </span><span class="me-2 ms-2 fw-bold">{{n|e}}</span>
+                </p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+

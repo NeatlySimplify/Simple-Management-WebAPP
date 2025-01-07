@@ -1,0 +1,180 @@
+{% extends "user_view.html" %}
+{% block page_title %}Transações{% endblock %}
+{% block page_content %}
+
+<div class="row">
+    <div 
+    class="
+        d-grid 
+        gap-2 
+        justify-content-around 
+        shadow 
+        bg-body-tertiary 
+        rounded">
+    <button
+        type="button"
+        name=""
+        id=""
+        class="btn"
+        data-bs-toggle="collapse" 
+        data-bs-target="#collapse-transactions-efective-list" 
+        aria-expanded="false" 
+        aria-controls="collapse-transactions-efective-list">
+        Entrada
+    </button>
+    <div>
+        <span>
+            {{transactions_efective|length}}
+        </span>
+        <i 
+            class="
+                fa 
+                fa-solid 
+                fa-angles-down">
+        </i>
+    </div>
+</div>
+
+{% if transactions_efective %}
+<div 
+    class="
+        row 
+        collapse" 
+    id="collapse-schedule-active-list">
+    {% for data in transactions_efective %}
+    <div 
+        class="col-12 ">
+        <div 
+            class="card">
+            <div 
+                class="d-none">
+                <span 
+                    id="app-transactions-id">
+                    {{data.id}}
+                </span>
+            </div>
+            <div 
+                class="card-body">
+                <h3 
+                    class="card-title">
+                    {{data.name}}
+                </h3>
+                <ul 
+                    class="
+                        list-group 
+                        list-group-flush">
+                    <li 
+                        class="list-group-item">
+                        Valor : {{data.value}}
+                    </li>
+                    <li 
+                        class="list-group-item">
+                        Ciclo : {{data.cycle}}
+                    </li>
+                    <li 
+                        class="list-group-item">
+                        Category : {{data.category}}
+                    </li>
+                    <li 
+                        class="list-group-item">
+                        Conta Bancária : {{data.account.bankName}}
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <h2>Nenhum compromisso encontrado</h2>
+    {% endfor %}
+</div>
+{% endif %}
+</div>
+
+<div class="row">
+    <div 
+    class="
+        d-grid 
+        gap-2 
+        justify-content-around
+        bg-body-tertiary
+        shadow
+        rounded">
+    <button
+        type="button"
+        name=""
+        id=""
+        class="btn"
+        data-bs-toggle="collapse" 
+        data-bs-target="#collapse-schedule-inactive-list" 
+        aria-expanded="false" 
+        aria-controls="collapse-schedule-inactive-list">
+        Compromissos Efetivos
+    </button>
+    <div>
+        <span>
+            {{schedule_inactive|length}}
+        </span>
+        <i 
+            class="
+                fa 
+                fa-solid 
+                fa-angles-down">
+        </i>
+    </div>
+</div>
+
+{% if schedule_inactive %}
+<div 
+    class="
+        row 
+        collapse" 
+    id="collapse-schedule-inactive-list">
+    {% for data in schedule_inactive %}
+    <div 
+        class="col-12 ">
+        <div 
+            class="card">
+            <div 
+                class="d-none">
+                <span 
+                    id="app-schedule-id">
+                    {{data.origin}}"
+                </span>
+            </div>
+            <div 
+                class="card-body">
+                <h3 
+                    class="card-title">
+                    {{data.tag_type}}
+                </h3>
+                <ul 
+                    class="
+                        list-group 
+                        list-group-flush">
+                    <li 
+                        class="list-group-item">
+                        Vencimento : {{data.end_date}}
+                    </li>
+                    <li 
+                        class="list-group-item">
+                        Nome : {{data.name}}
+                    </li>
+                    <li 
+                        class="list-group-item">
+                        Tipo : {{schedule.cycle}}
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <h2>Nenhum compromisso encontrado</h2>
+    {% endfor %}
+</div>
+{% endif %}
+</div>
+
+
+
+
+{% endblock %}

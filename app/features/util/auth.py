@@ -1,32 +1,19 @@
-from multiprocessing import Value
-import bcrypt
 from http import HTTPStatus
-from fastapi.responses import RedirectResponse
 from fastapi import HTTPException, Request
-from datetime import datetime, timedelta, timezone
-from .variables import (
-    SECRET_KEY,
-    ALGORITHM,
-    TOKEN_EXPIRATION,
-    tokens
-)
+from datetime import datetime, timedelta
+from decouple import config
 import jwt
 from starlette.middleware.base import BaseHTTPMiddleware
+    
 
-
-class CookieInitializationMiddleware(BaseHTTPMiddleware):
-    async def dispatch(self, request: Request, call_next):
-        response = await call_next(request)
-        # Initialize the `access_token` cookie if missing
-        if not request.cookies.get("access_token"):
-            response.set_cookie(
-                key="access_token",
-                value="",  # Default empty value
-                httponly=False,
-                secure=False,
-                samesite="lax"
-            )
-        return response
+SECRET_KEY = config("secret")
+ALGORITHM = config("algorithm")
+TOKEN_EXPIRATION = float(config("jwtToken_expire_time"))
+SESSION_SECRET_KEY = config("session_secret")
+session_config = {
+    "secret_key": SESSION_SECRET_KEY
+}
+tokens = {}
 
 
 def extract_token(request: Request):
@@ -38,7 +25,6 @@ def extract_token(request: Request):
             detail="Access token is missing, redirecting to login.",
         )
     return token
-        
 
 
 def create_access_token(user_id: str):
@@ -67,7 +53,6 @@ def verify(token: str):
 async def get_current_user(request: Request):
     try:
         token = extract_token(request)
-        
         # Decode the JWT token
         if user_id := decode_token(token) is None:
             raise HTTPException(
@@ -82,7 +67,6 @@ async def get_current_user(request: Request):
         #         status_code=HTTPStatus.UNAUTHORIZED,
         #         detail="User not found.",
         #     )
-        
     except jwt.InvalidTokenError:
         # Raise an HTTPException for invalid token
         raise HTTPException(
@@ -95,23 +79,5 @@ async def get_current_user(request: Request):
             status_code=HTTPStatus.UNAUTHORIZED,
             detail=str(e),
         )
-    
     # Return the user object
     return user_id
-
-def hash_password(password: str) -> str:
-    if not isinstance(password, str):
-        raise ValueError("Password must be a string.")
-    # Generate a salt
-    salt = bcrypt.gensalt()
-    # Hash the password
-    hashed_password = bcrypt.hashpw(password.encode('utf-8'), salt)
-    # Return the hashed password as a string
-    return hashed_password.decode('utf-8')
-
-
-def verify_password(password: str, hashed_password: str) -> bool:
-    if not isinstance(password, str) or not isinstance(hashed_password, str):
-        raise ValueError("Both password and hashed_password must be strings.")
-    return bcrypt.checkpw(password.encode('utf-8'), hashed_password.encode('utf-8'))
-

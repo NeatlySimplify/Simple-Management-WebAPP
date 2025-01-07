@@ -1,0 +1,94 @@
+<div 
+    class="
+        table-responsive 
+        overflow-y-auto">
+    <table 
+        class="
+            table 
+            table-primary">
+        <thead>
+            <tr>
+                <th 
+                    scope="col">
+                    Efetivado
+                </th>
+                <th 
+                    scope="col">
+                    Origem
+                </th>
+                <th 
+                    scope="col">
+                    Data
+                </th>
+                <th 
+                    scope="col">
+                    Nome
+                </th>
+            </tr>
+        </thead>
+        <tbody 
+            class="
+                table-hover 
+                table-group-divider">
+            {% for item in schedulerList %}
+            <tr 
+                class="clickable-row"
+                data-app-id="{{item.id}}">
+                <td 
+                    scope="row">
+                    {% if item.status == True %} 
+                        &#128994; 
+                    {% else %} 
+                        &#128308;
+                    {% endif %}
+                </td>
+                <td 
+                    scope="row">
+                    {{ item.origem }}
+                </td>
+                <td>
+                    {{ item.date_end }}
+                </td>
+                <td>
+                    {{ item.name }}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <script>
+        $(document).ready(function() {
+            $(".clickable-row").click(function () {
+                var userId = $(this).data('id');
+                var category = $(this).data('category')
+
+                $.ajax({
+                    url: `/${category}/${id}`,
+                    method: 'GET',
+                    success: function(response) {
+                        $('#modal-container').html(response);
+                        $('.modal').modal('show')
+                    },
+                    error: function() {
+                        alert('Failed to load data')
+                    }
+                });
+                /* $.ajax({    
+                    To edit
+                    url: "https://your-fastapi-backend/api/resource", // Backend API endpoint
+                    method: "GET",
+                    headers: {
+                    "X-Resource-ID": resourceId, // Custom header for resource ID
+                    "Authorization": `Bearer ${sessionToken}` // Token in Authorization header
+                    },
+                    success: function (response) {
+                    console.log("Data received:", response); // Handle success
+                    },
+                    error: function (xhr, status, error) {
+                    console.error("Error:", error); // Handle errors
+                    }
+                }); */
+            });
+        });
+    </script>
+</div>

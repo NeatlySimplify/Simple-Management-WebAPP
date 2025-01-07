@@ -1,0 +1,77 @@
+<div class="card-group row">
+    {% for address in client.address %}
+    <div class="card col-12 col-sm-6 col-md-4">
+        <div class="card-body" id="card-{{ address.id }}">
+            <h3 class="card-title">Endereço 1</h3>
+            <hr>
+            <h5 class="card-text">Estado</h5>
+            <p class="card-text">{{ address.state }}</p>
+            <h5 class="card-text">Cidade</h5>
+            <p class="card-text">{{ address.city }}</p>
+            <h5 class="card-text">Bairro</h5>
+            <p class="card-text">{{address.district}}</p>
+            <h5 class="card-text">Rua</h5>
+            <p class="card-text">{{ address.street }}</p>
+            <h5 class="card-text">Número</h5>
+            <p class="card-text">{{ address.number }}</p>
+            <h5 class="card-text">Complemento</h5>
+            <p class="card-text">{{address.complement}}</p>
+            <h5 class="card-text">CEP</h5>
+            <p class="card-text">{{address.postal}}</p>
+        </div>
+        <button class="btn btn-outline-danger delete-btn" data-address-id="{{ address.id }}">Excluir</button>
+        <button id="btn btn-outline-primary edit-btn" 
+        data-address-id="{{ address.id }}"
+        data-address-state="{{address.state}}"
+        data-address-city="{{address.city}}"
+        data-address-district="{{address.district}}"
+        data-address-street="{{address.street}}"
+        data-address-number="{{address.number}}"
+        data-address-complement="{{address.complement}}"
+        data-address-postal="{{address.postal}}"
+        >Editar</button>
+    </div>
+    {% endfor %}
+    <script>
+        $(document).ready(function () {
+            $(document).on('click', 'edit-btn', function(){
+                let cardId = {
+                    id: $(this).data('address-id'),
+                    state: $(this).data('address-state'),
+                    city: $(this).data('address-city'),
+                    district: $(this).data('address-district'),
+                    street: $(this).data('address-street'),
+                    number: $(this).data('address-number'),
+                    complement: $(this).data('address-complement'),
+                    postal: $(this).data('address-postal'),
+                }
+                $.ajax({
+                    url: `/clients/address/`,
+                    type: 'GET',
+                    contentType: 'application/json',
+                    data: JSON.stringify(cardId),
+                    success: function(response) {
+                        $(`#card-${cardId.id} .card-body`).html(response)
+                    },
+                    error: function(){
+                        alert('Não foi possivel conseguir o formulário!!')
+                    }
+                })
+            })
+            $(document).on('click', 'delete-btn',function () { 
+                let id = $.(this).data('address-id')
+                $.ajax({
+                    type: "DELETE",
+                    url: "/clients/address/",
+                    data: id,
+                    contentType: 'application/json',
+                    success: function (response) {
+                        alert('Endereço deletado com sucesso');
+                        $(this).closest('card').remove();
+                    }
+                });
+                
+            });
+        });
+    </script>    
+</div>
