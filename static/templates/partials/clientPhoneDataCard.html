@@ -1,0 +1,23 @@
+<div class="card-group row">
+    {% for phone in client.phone %}
+    <div class="card col-12 col-sm-6 col-md-4">
+        <div class="card-body" id="card-{{ phone.id }}">
+            <h3 class="card-title">Telefone de Contato {{phone.index}}</h3>
+            <hr>
+            <h5 class="card-text">Número</h5>
+            <p class="card-text">{{ phone.number }}</p>
+            <h5 class="card-text">Tipo de Telefone</h5>
+            <p class="card-text">{{ phone.contact }}</p>
+            <h5 class="card-text">Detalhes</h5>
+            <p class="card-text">{{phone.complement}}</p>
+        </div>
+        <button class="btn btn-outline-danger delete-btn" data-phone-id="{{ phone.id }}">Excluir</button>
+        <button id="btn btn-outline-primary edit-btn" 
+        data-phone-id="{{ phone.id }}"
+        data-phone-number="{{phone.number}}"
+        data-phone-contact="{{phone.contact}}"
+        data-phone-complement="{{phone.complement}}"
+        >Editar</button>
+    </div>
+    {% endfor %}
+</div>

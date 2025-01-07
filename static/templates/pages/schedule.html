@@ -1,0 +1,151 @@
+{% extends "user_view.html" %}
+{% block page_title %}Agenda{% endblock %}
+{% block page_content %}
+<div class="row">
+    <div 
+        class="
+            d-grid 
+            gap-2 
+            justify-content-around 
+            shadow 
+            bg-body-tertiary 
+            rounded">
+        <button
+            type="button"
+            name=""
+            id=""
+            class="btn"
+            data-bs-toggle="collapse" 
+            data-bs-target="#collapse-client-template-list" 
+            aria-expanded="false" 
+            aria-controls="collapse-client-template-list">
+            Templates de Clientes
+        </button>
+        <div>
+            <span>
+                {{client_template|length}}
+            </span>
+            <i 
+                class="
+                    fa 
+                    fa-solid 
+                    fa-angles-down">
+            </i>
+        </div>
+    </div>
+    {% if client_template %}
+    <div 
+        class=" 
+            collapse" 
+        id="collapse-client-template-list">
+        {% for data in client_template %}
+        <div 
+            class="col-12 ">
+            <div 
+                class="card">
+                <div 
+                    class="d-none">
+                    <span 
+                        id="app-client-template-id">
+                        {{data.id}}
+                    </span>
+                </div>
+                <div 
+                    class="card-body">
+                    <h3 
+                        class="card-title">
+                        {{data.title}}
+                    </h3>
+                    <ul 
+                        class="
+                            list-group 
+                            list-group-flush">
+                        <li 
+                            class="list-group-item">
+                            Criado : {{data.date}}
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <h2>Nenhum template encontrado</h2>
+        {% endfor %}
+    </div>
+    {% endif %}
+</div>
+<div class="row">
+    <div 
+        class="
+            d-grid 
+            gap-2 
+            justify-content-around 
+            shadow 
+            bg-body-tertiary 
+            rounded">
+        <button
+            type="button"
+            name=""
+            id=""
+            class="btn"
+            data-bs-toggle="collapse" 
+            data-bs-target="#collapse-service-template-list" 
+            aria-expanded="false" 
+            aria-controls="collapse-service-template-list">
+            Templates de Serviços
+        </button>
+        <div>
+            <span>
+                {{service_template|length}}
+            </span>
+            <i 
+                class="
+                    fa 
+                    fa-solid 
+                    fa-angles-down">
+            </i>
+        </div>
+    </div>
+    {% if service_template %}
+    <div 
+        class=" 
+            collapse" 
+        id="collapse-service-template-list">
+        {% for data in service_template %}
+        <div 
+            class="col-12 ">
+            <div 
+                class="card">
+                <div 
+                    class="d-none">
+                    <span 
+                        id="app-service-template-id">
+                        {{data.id}}
+                    </span>
+                </div>
+                <div 
+                    class="card-body">
+                    <h3 
+                        class="card-title">
+                        {{data.title}}
+                    </h3>
+                    <ul 
+                        class="
+                            list-group 
+                            list-group-flush">
+                        <li 
+                            class="list-group-item">
+                            Criado : {{data.date}}
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <h2>Nenhum template encontrado</h2>
+        {% endfor %}
+    </div>
+    {% endif %}
+</div>
+
+{% endblock %}

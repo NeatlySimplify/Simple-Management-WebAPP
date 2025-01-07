@@ -1,0 +1,39 @@
+{% block modal_name %}{{client.name}}{% endblock %}
+{% block modal_body %}
+    <div class="row">
+        {% include 'clientDataCard.html' with title='E-mail', value={{client.email}} %}
+        {% include 'clientDataCard.html' with title='Sexo:', value={{client.sex}} %}
+        {% include 'clientDataCard.html' with title='Estado Civil:', value={{client.relationship}} %}
+        {% if client.type_client != 'Pessoa Jurídica' %}
+            {% include 'clientDataCard.html' with title='CPF:', value={{client.govt_id}} %}
+        {% else %}
+            {% include 'clientDataCard.html' with title='CNPJ:', value={{client.govt_id}} %}
+        {% endif %}
+        {% include 'clientDataCard.html' with title='Detalhes', value={{client.details}} %}
+        {% include 'clientAddressDataCard.html' %}
+        {% include 'clientPhoneDataCard.html'%}
+        {% for item in client.custom_fields %}
+            {% include 'clientDataCard.html' with title=item.title, value=item.value %}
+        {% endfor %}
+        <div class="row my-5 btn-group" role="group">
+            <button
+                type="button"
+                class="
+                    btn 
+                    btn-outline-light 
+                    app-client-edit">
+                Editar
+            </button>
+            <button
+                type="button"
+                data-bs-toggle="modal"
+                data-bs-target="#staticBackdrop"
+                class="
+                    btn 
+                    btn-outline-light
+                    app-client-delete">
+                Deletar
+            </button>
+        </div>
+    </div>
+{% endblock %}

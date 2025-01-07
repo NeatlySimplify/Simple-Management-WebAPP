@@ -1,0 +1,48 @@
+{% extends "user_view.html" %}
+{% block page_title %}Serviços{% endblock %}
+{% block page_content %}
+<div class="row"></div>
+{% for data in service %}
+    <div 
+        class="col-12">
+        <div 
+            class="card">
+            <div 
+                class="d-none">
+                <span 
+                    id="app-service-id">
+                    {{data.id}}
+                </span>
+            </div>
+            <div 
+                class="card-body">
+                <h3 
+                    class="card-title">
+                    {{data.client.name}}
+                </h3>
+                <ul 
+                    class="
+                        list-group 
+                        list-group-flush">
+                    <li 
+                        class="list-group-item">
+                        ID : {{data.id_service}}
+                    </li>
+                    <li 
+                        class="list-group-item">
+                        Valor Total : {{data.value}}
+                    </li>
+                    <li 
+                        class="list-group-item">
+                        Status : {{data.status}}
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+{% else %}
+    <h2>Nenhuma entrada encontrada!</h2>
+{% endfor %}
+
+{% endblock %}

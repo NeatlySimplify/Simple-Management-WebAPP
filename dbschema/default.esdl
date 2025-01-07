@@ -7,24 +7,22 @@ module default {
     }
 
     type Address {
-        client: Client;
         state: str;
         city: str;
         district: str;
         street: str;
-        number: str;
+        number: int16;
         complement: str;
         postal: str;
     }
 
     type Contact {
-        client: Client;
         number: str;
         contact: str;
         complement: str;
     }
 
-    type Client {
+    type Unit {
         user: User;
         required timestamp: datetime {
             default := datetime_of_statement();
@@ -38,11 +36,17 @@ module default {
         sex: str;
         relationship: str;
         details: str;
-        type_client: str;
-        birth: datetime;
-        multi phone := (.<client[is Contact]);
-        multi address := (.<client[is Address]);
-        custom_fields: array<json>;
+        type_unit: str;
+        birth: cal::local_date;
+        single phone : Contact{
+            on source delete delete target;
+            on target delete allow;
+        };
+        single address : Address{
+            on source delete delete target;
+            on target delete allow;
+        };
+        custom_fields: json;
 
         trigger log_update after update for each when ( <json>__old__ {*} != <json>__new__ {*}
         ) do (
@@ -86,7 +90,7 @@ module default {
         template_model: str;
         details: str;
         custom_fields: json;
-        multi clients: Client {
+        unit: Unit {
             on source delete delete target;
         };
         multi event: Scheduler {
@@ -152,6 +156,7 @@ module default {
 
     type Scheduler {
         user: User;
+        tag_type: str;
         origin: uuid;
         name: str;
         status: bool {
@@ -159,14 +164,9 @@ module default {
         };
         end_date: cal::local_date;
         effective_date: cal::local_date;
-        beginning_time: datetime;
-        end_time: datetime;
-        cycle: str;
+        beginning_time: cal::local_time;
+        end_time: cal::local_time;
         details: str;
-        tag_type: str;
-        auto_change_status: bool {
-            default:= false;
-        };
     }
 
     type MonthlySumary {
@@ -239,7 +239,7 @@ module default {
             on target delete allow;
             on source delete delete target;
         };
-        multi client : Client {
+        multi unit : Unit {
             on target delete allow;
             on source delete delete target;
         };
@@ -274,7 +274,7 @@ module default {
             }
         );
 
-        trigger log_delete after delete for each do (  
+        trigger log_delete after delete for each do (
             insert Auditable {
                 user := __old__.id,
                 id_objeto := __old__.id,
@@ -362,7 +362,7 @@ module default {
             }
         );
 
-        # Updates from balance on action.account.balance when delete Payment.
+        # Updates balance on action.account.balance when delete Payment.
         trigger update_balance_on_delete after delete for each when (
             __old__.status = true
         ) do (
@@ -412,7 +412,6 @@ module default {
                 status:= __new__.status,
                 end_date:= __new__.isDue,
                 effective_date:= __new__.paymentDate,
-                cycle:= "Unique",
                 tag_type:= "Action",
                 }
             )
@@ -420,7 +419,7 @@ module default {
                 event := data
             }
         );
-        
+
         # Updates Payment.event.
         trigger update_event after update for each do (
             update __old__.event set {
@@ -431,4 +430,50 @@ module default {
             }
         )
     }
+
+    #Functions
+
+    #Count Number of institutions or individuals from user
+    function unitNum (user_id: str) -> int64
+        using (
+            with units := (select User filter .id = <uuid>user_id).unit
+            select count(units)
+        );
+
+    # Count Number of Services from user
+    function serviceNum (user_id: str) -> int64
+        using (
+            with services := (select User filter .id = <uuid>user_id).service
+            select count(services)
+        );
+
+    ## Count Number of Transactions from user
+    function transactionNum (user_id: str) -> int64
+        using (
+            with action := (select User filter .id = <uuid>user_id).actions
+            select count(action)
+        );
+
+    # Count Number of Events from user
+    function eventNum (user_id: str) -> int64
+        using (
+            with events := (select User filter .id = <uuid>user_id).event
+            select count(events)
+        );
+
+    # Count Number of Templates from user
+    function templatesNum (user_id: str) -> int64
+        using (
+            with template := (select User filter .id = <uuid>user_id).templates
+            select count(template)
+        );
+
+    # Return total balance from user
+    function balanceTotal (user_id: str) -> float64
+        using (
+            with total := (select User filter .id = <uuid>user_id).account
+            select sum(total.balance)
+        );
+
+    #
 }

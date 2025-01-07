@@ -6,28 +6,16 @@ from fastapi import HTTPException, Request
 from edgedb import errors
 
 
-@asynccontextmanager
-async def lifetime(app):
-    app.state.edgedb = edgedb.create_async_client()
-    await app.state.edgedb.ensure_connected()
-    try:
-        # Yield control to the application
-        yield
-    finally:
-        # Shutdown: Close the EdgeDB client
-        await app.state.edgedb.aclose()
-        app.state.edgedb = None
-
 def get_edgedb_client(request: Request) -> edgedb.AsyncIOClient:
     return request.app.state.edgedb
-    
+
 
 def handle_database_errors(func):
     @functools.wraps(func)
     async def wrapper(*args, **kwargs):
         try:
             return await func(*args, **kwargs)
-        
+
         except errors.QueryError as e:
             return HTTPException(
                 status_code=HTTPStatus.BAD_REQUEST,
@@ -37,7 +25,7 @@ def handle_database_errors(func):
                     "details": str(e)
                 }
             )
-        
+
         except errors.IntegrityError as e:
             return HTTPException(
                 status_code=HTTPStatus.CONFLICT,
@@ -57,7 +45,7 @@ def handle_database_errors(func):
                     "details": str(e)
                 }
             )
-        
+
         except errors.ProtocolError as e:
             return HTTPException(
                 status_code=HTTPStatus.BAD_REQUEST,
@@ -97,17 +85,7 @@ def handle_database_errors(func):
                     "details": str(e)
                 }
             )
-        
-        except errors.QueryTimeoutError as e:
-            return HTTPException(
-                status_code=HTTPStatus.REQUEST_TIMEOUT,
-                detail={
-                    "status": "error",
-                    "message": "The query execution timed out.",
-                    "details": str(e)
-                }
-            )
-        
+
         except Exception as e:
             return HTTPException(
                 status_code=HTTPStatus.INTERNAL_SERVER_ERROR,

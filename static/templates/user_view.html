@@ -1,0 +1,14 @@
+{% extends "root.html" %}
+{% block view %}
+<div>
+    <div>
+        {% include "partials/sidebar.html" %}
+    </div>
+    <main id="main_content" class="container-fluid">
+        {% block page_content %}{% endblock %}
+    </main>
+</div>
+<div>
+    {% include 'partials/modalFrame.html' %}
+</div>
+{% endblock %}

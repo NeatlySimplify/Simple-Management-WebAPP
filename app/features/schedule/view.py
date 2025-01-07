@@ -1,8 +1,9 @@
 from http import HTTPStatus
 from fastapi import APIRouter, Depends, Request
-from .util.database import get_edgedb_client
-from .util.auth import get_current_user
-from .util.variables import templates
+from ..util.database import get_edgedb_client
+from ..util.auth import get_current_user
+from ...main import templates
+from .control import *
 
 
 router = APIRouter(prefix='/schedule')
@@ -20,11 +21,14 @@ async def schedule(
         executor=db_schedule,
         user_id=id
         )
+    schedule_active = [x for x in schedule_list if x.status]
+    schedule_inactive = [x for x in schedule_list if not x.status]
     return templates.TemplateResponse(
         request=request,
         name='schedules.html',
         context={
-            'schedule': schedule_list
+            'schedule_active': schedule_active,
+            'schedule_inactive': schedule_inactive
         },
         status_code=HTTPStatus.OK
     )
